@@ -60,12 +60,16 @@ def mask2string(dir):
     }
     return r
 
+def make_submit(predict_path):
 
-MASK_DIR_PATH = "/content/drive/MyDrive/20211/prj3/final-code-neo/output/save_output"
-dir = MASK_DIR_PATH
-res = mask2string(dir)
-df = pd.DataFrame(columns=['Id', 'Expected'])
-df['Id'] = res['ids']
-df['Expected'] = res['strings']
+    MASK_DIR_PATH = predict_path
+    name_csv = str(MASK_DIR_PATH).split("/")[-1]
+    dir = MASK_DIR_PATH
+    res = mask2string(dir)
+    df = pd.DataFrame(columns=['Id', 'Expected'])
+    df['Id'] = res['ids']
+    df['Expected'] = res['strings']
 
-df.to_csv("/content/drive/MyDrive/20211/prj3/final-code-neo/output/submit/out.csv", index=False)
+    df.to_csv("/content/drive/MyDrive/20211/prj3/neoplasm-detection/output/submit/"+name_csv+".csv", index=False)
+
+

@@ -57,6 +57,9 @@ class NeoUNet(nn.Module):
         self.num_classes = num_classes
 
         self.encoder = hardnet(pretrained=pretrained)
+
+        # khong call ngay dcd vi con custom jh ay 
+        # self.encoder = torch.hub.load('PingoLH/Pytorch-HarDNet', 'hardnet68', pretrained=True)
         self.d0, self.d1, self.d2, self.d3, self.d4 = 64, 128, 320, 640, 1024
 
         self.decode0 = self._decoder_block(self.d0 * 2, self.d0)

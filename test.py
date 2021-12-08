@@ -13,11 +13,17 @@ from model.neo_unet import NeoUNet
 from model.loss import *
 from data_loader import TestDataset
 
-save_path = '/content/drive/MyDrive/20211/prj3/final-code-neo/output/save_output'
-snapshot_path = '/content/drive/MyDrive/20211/prj3/final-code-neo/model/pth/epoch 003_loss:1.11730.pth'
+save_path_root = '/content/drive/MyDrive/20211/prj3/neoplasm-detection/output/' 
 test_path = glob('/content/drive/MyDrive/20211/prj3/data/test/test/*.jpeg')
 
-def run_test():
+def run_test_neo(model_path):
+
+    snapshot_path = model_path
+    model_name = str(snapshot_path).split("/")[-1]
+    save_folder = str(model_name).replace(".pth","")
+
+    save_path = save_path_root+ save_folder
+    os.makedirs(save_path, exist_ok=True)
 
     device = torch.cuda if torch.cuda.is_available() else torch.device('cpu')
     model = NeoUNet()
