@@ -16,7 +16,7 @@ from model.loss import *
 class CFG: 
     train_image_size = 352
     prin_freq = 10
-    num_epochs = 2
+    num_epochs = 4
     batch_size = 16
     num_workers = 4   #  woker read ? 
     lr = 0.001  
@@ -28,8 +28,8 @@ class CFG:
 def train(train_loader, model, custom_loss, optimizer, epoch, device):
      
      
-    losses = AvgMeter()
-    dice_scores = AvgMeter()
+    total_loss = AvgMeter()
+    total_dice_scores = AvgMeter()
 
     # 1000/16 = 62 step
     for step, item in enumerate(train_loader):
@@ -47,14 +47,14 @@ def train(train_loader, model, custom_loss, optimizer, epoch, device):
           
         # cap nhat 
         dice = dice_score(out, gts)
-        losses.update(loss.item(), batchsz)
-        dice_scores.update(dice.item(), batchsz)
+        total_loss.update(loss.item(), batchsz)      # loss.item()  -> return loss 
+        total_dice_scores.update(dice.item(), batchsz)
             
 
         if step % CFG.prin_freq == 0 or step == len(train_loader) - 1:
             print('Epoch {:03d} | Step {:04d}/{:04d} | Train loss: {:.4f} |train dice: {:.3f} '
-                  .format(epoch, step, len(train_loader), losses.avg, dice_scores.avg ))
-    return losses.avg 
+                  .format(epoch, step, len(train_loader), total_loss.avg, total_dice_scores.avg ))
+    return total_loss.avg 
 
 
 def train_loop(train_dataset):

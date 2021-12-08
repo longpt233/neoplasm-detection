@@ -25,8 +25,7 @@ class AvgMeter(object):
 
     def show(self):
         return torch.mean(torch.stack(self.losses[np.maximum(len(self.losses)-self.num, 0):]))
-
-    
+ 
 
 class CrossEntropyLoss(nn.Module):
     def forward(self, pred, label):
