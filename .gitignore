@@ -131,3 +131,5 @@ dmypy.json
 # model
 *.pth
 *.png
+*.jpeg
+*.h5
