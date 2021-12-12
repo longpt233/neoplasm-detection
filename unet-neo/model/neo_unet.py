@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 
 
 # custom import 
-from model.hardnet import hardnet
+from model.hardnet import hardnet68
 
 
 class AdditiveAttnGate(pl.LightningModule):
@@ -44,6 +44,7 @@ class AdditiveAttnGate(pl.LightningModule):
         alpha = self.conv_group(alpha)  # B x C x 2H x 2W
         alpha = nn.Sigmoid()(alpha)  # B x C x 2H x 2W
 
+        # Down/up samples the input to either the given size or the given scale_factor
         alpha = F.interpolate(alpha, scale_factor=2, mode="bilinear")  # B x C x H x W
 
         out = x * alpha
@@ -56,10 +57,8 @@ class NeoUNet(nn.Module):
         super().__init__()
         self.num_classes = num_classes
 
-        self.encoder = hardnet(pretrained=pretrained)
-
-        # khong call ngay dcd vi con custom jh ay 
-        # self.encoder = torch.hub.load('PingoLH/Pytorch-HarDNet', 'hardnet68', pretrained=True)
+        self.encoder = hardnet68(pretrained=pretrained)
+        
         self.d0, self.d1, self.d2, self.d3, self.d4 = 64, 128, 320, 640, 1024
 
         self.decode0 = self._decoder_block(self.d0 * 2, self.d0)

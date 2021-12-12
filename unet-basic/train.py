@@ -4,6 +4,9 @@ from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, Early
 import os
 import matplotlib.pyplot as plt
 from tensorflow.keras.optimizers import Adam
+from keras import backend as K
+
+# import segmentation_models_3D as sm 
 
 
 # local 
@@ -44,16 +47,15 @@ def fit_model(model_and_path):
 
   model = model_and_path["model"]
 
-  model.compile(loss='categorical_crossentropy',
-              optimizer=tf.keras.optimizers.Adam(1e-4),
-              metrics=[
-                  tf.keras.metrics.Precision(),
-                  tf.keras.metrics.Recall(),
-                  tf.keras.metrics.CategoricalAccuracy(name='acc'),
-                  tf.keras.metrics.MeanIoU(num_classes=3)
-              ])
+  model.compile(loss=tversky_loss,
+                optimizer=tf.keras.optimizers.Adam(1e-4),
+                metrics=[
+                    tf.keras.metrics.CategoricalAccuracy(name='acc'),
+                    tf.keras.metrics.MeanIoU(num_classes=3),
+                    dice_coef,
+                    dice_coef_v2
+                ])
 
-  # model.compile(optimizer=Adam(lr=1e-3), loss='mse', metrics=['accuracy'])
 
   # fit 
   H = model.fit(train_dataset,
@@ -65,6 +67,47 @@ def fit_model(model_and_path):
               )
 
   return H ,model
+
+def dice_coef(y_true, y_pred, smooth=1):
+  intersection = K.sum(y_true * y_pred, axis=[1,2,3])
+  union = K.sum(y_true, axis=[1,2,3]) + K.sum(y_pred, axis=[1,2,3])
+  dice = K.mean((2. * intersection + smooth)/(union + smooth), axis=0)
+  return dice
+
+def dice_coef_v2(y_true, y_pred):
+    smooth = 1.
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    score = (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+    return score
+
+
+def tversky(y_true, y_pred, smooth = 1):
+    y_true_pos = K.flatten(y_true)
+    y_pred_pos = K.flatten(y_pred)
+    y_true_pos = K.cast(y_true_pos,"float32")
+    true_pos = K.sum(y_true_pos * y_pred_pos)
+    false_neg = K.sum(y_true_pos * (1-y_pred_pos))
+    false_pos = K.sum((1-y_true_pos)*y_pred_pos)
+    alpha = 0.7
+    return (true_pos + smooth)/(true_pos + alpha*false_neg + (1-alpha)*false_pos + smooth)
+
+def tversky_loss(y_true, y_pred):
+    return 1 - tversky(y_true,y_pred)
+
+def focal_loss(targets, inputs, alpha=0.8, gamma=2):    
+    
+    inputs = K.flatten(inputs)
+    targets = K.flatten(targets)
+
+    targets = K.cast(targets,"float32")
+
+    BCE = K.binary_crossentropy(targets, inputs)
+    BCE_EXP = K.exp(-BCE)
+    focal_loss = K.mean(alpha * K.pow((1-BCE_EXP), gamma) * BCE)
+    
+    return focal_loss
 
 '''
 name = name model 
@@ -94,7 +137,7 @@ def load_model(name, is_train= True):
             return model
         
         elif name == "unet++":
-            model= unet_nested_v2.Nest_Net( deep_supervision=False)
+            model= unet_nested_v2.Nest_Net(deep_supervision=False)
             model.load_weights(config.MODEL_PATH_NESTED)
             return model
 

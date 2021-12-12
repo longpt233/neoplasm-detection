@@ -28,7 +28,7 @@ class AvgMeter(object):
  
 class CrossEntropyLoss(nn.Module):
     def forward(self, pred, label):
-        if pred.shape[1] == 1:
+        if pred.shape[1] == 1:  # với nhãn 1 
             cross_entropy_loss = F.binary_cross_entropy_with_logits(pred, label.float(), reduction='none')
         else:
             cross_entropy_loss = F.cross_entropy(pred, torch.argmax(label, dim=1), reduction='none')

@@ -24,7 +24,7 @@ def predict(model):
     for i in range(255):
       for j in range(255):
         if img[i,j] == 1:
-          test[i,j] = [255,0,0]
+          test[i,j] =  [0,0,255]
         if img[i,j] == 2:
           test[i,j] = [0,255,0] 
 

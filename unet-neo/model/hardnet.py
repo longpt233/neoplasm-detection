@@ -1,11 +1,7 @@
 import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
-from torch.hub import load_state_dict_from_url
-
-# +
 class Flatten(nn.Module):
     def __init__(self):
         super().__init__()
@@ -58,9 +54,7 @@ class DWConvLayer(nn.Sequential):
 
 
 class ConvLayer(nn.Sequential):
-    def __init__(
-        self, in_channels, out_channels, kernel=3, stride=1, dropout=0.1, bias=False
-    ):
+    def __init__(self, in_channels, out_channels, kernel=3, stride=1, dropout=0.1, bias=False):
         super().__init__()
         out_ch = out_channels
         groups = 1
@@ -110,16 +104,7 @@ class HarDBlock(nn.Module):
     def get_out_ch(self):
         return self.out_channels
 
-    def __init__(
-        self,
-        in_channels,
-        growth_rate,
-        grmul,
-        n_layers,
-        keepBase=False,
-        residual_out=False,
-        dwconv=False,
-    ):
+    def __init__( self, in_channels, growth_rate, grmul,n_layers, keepBase=False, residual_out=False, dwconv=False,):
         super().__init__()
         self.keepBase = keepBase
         self.links = []
@@ -179,22 +164,6 @@ class HarDNet(nn.Module):
         n_layers = [8, 16, 16, 16, 4]
         downSamp = [1, 0, 1, 1, 0]
 
-        if arch == 85:
-            # HarDNet85
-            first_ch = [48, 96]
-            ch_list = [192, 256, 320, 480, 720, 1280]
-            gr = [24, 24, 28, 36, 48, 256]
-            n_layers = [8, 16, 16, 16, 16, 4]
-            downSamp = [1, 0, 1, 0, 1, 0]
-            drop_rate = 0.2
-        elif arch == 39:
-            # HarDNet39
-            first_ch = [24, 48]
-            ch_list = [96, 320, 640, 1024]
-            grmul = 1.6
-            gr = [16, 20, 64, 160]
-            n_layers = [4, 16, 8, 4]
-            downSamp = [1, 1, 1, 0]
 
         if depth_wise:
             second_kernel = 1
@@ -265,12 +234,12 @@ class HarDNet(nn.Module):
         return out_branch
 
 
-def hardnet(arch=68, pretrained=True, device="cpu", **kwargs):
-    if arch == 68:
-        model = HarDNet(arch=68)
-        if pretrained:
-            hardnet68 = torch.hub.load('PingoLH/Pytorch-HarDNet', 'hardnet68', pretrained=True)
-            model.load_state_dict(hardnet68.state_dict())
-            print("68 LOADED READY")
+def hardnet68(pretrained=True):
+    
+    model = HarDNet(arch=68)
+    if pretrained:
+        hardnet68 = torch.hub.load('PingoLH/Pytorch-HarDNet', 'hardnet68', pretrained=True)
+        model.load_state_dict(hardnet68.state_dict())
+        print("Done load hardnet 68 ")
             
     return model
