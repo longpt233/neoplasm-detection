@@ -47,13 +47,11 @@ def fit_model(model_and_path):
 
   model = model_and_path["model"]
 
-  model.compile(loss=tversky_loss,
+  model.compile(loss='binary_crossentropy',
                 optimizer=tf.keras.optimizers.Adam(1e-4),
-                metrics=[
-                    tf.keras.metrics.CategoricalAccuracy(name='acc'),
-                    tf.keras.metrics.MeanIoU(num_classes=3),
-                    dice_coef,
-                    dice_coef_v2
+                metrics=[ 
+                    iou_score,
+                    dice_coef
                 ])
 
 
@@ -68,19 +66,33 @@ def fit_model(model_and_path):
 
   return H ,model
 
-def dice_coef(y_true, y_pred, smooth=1):
+def dice_coef_v2(y_true, y_pred, smooth=1):
   intersection = K.sum(y_true * y_pred, axis=[1,2,3])
   union = K.sum(y_true, axis=[1,2,3]) + K.sum(y_pred, axis=[1,2,3])
   dice = K.mean((2. * intersection + smooth)/(union + smooth), axis=0)
   return dice
 
-def dice_coef_v2(y_true, y_pred):
+def dice_coef(y_true, y_pred):
     smooth = 1.
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
     intersection = K.sum(y_true_f * y_pred_f)
     score = (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
     return score
+
+def iou_score(y_true, y_pred, smooth=1e-6):
+    
+    #flatten label and prediction tensors
+    inputs = K.flatten(y_pred)
+    inputs = K.cast(inputs,"float32")
+    targets = K.flatten(y_true)
+    
+    intersection = K.sum(targets* inputs)
+    total = K.sum(targets) + K.sum(inputs)
+    union = total - intersection
+    
+    IoU = (intersection + smooth) / (union + smooth)
+    return  IoU
 
 
 def tversky(y_true, y_pred, smooth = 1):
