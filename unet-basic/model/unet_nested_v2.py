@@ -16,9 +16,6 @@ smooth = 1.
 dropout_rate = 0.5
 
 
-########################################
-# 2D Standard
-########################################
 
 def standard_unit(input_tensor, stage, nb_filter, kernel_size=3):
 
@@ -108,6 +105,6 @@ def Nest_Net(img_rows, img_cols, color_type=1, num_class=1, deep_supervision=Fal
                                                nestnet_output_3,
                                                nestnet_output_4])
     else:
-        model = Model(img_input, nestnet_output_4)
+        model = Model(img_input, [nestnet_output_4])
 
     return model

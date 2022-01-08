@@ -6,9 +6,6 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.optimizers import Adam
 from keras import backend as K
 
-# import segmentation_models_3D as sm 
-
-
 # local 
 from model import unet
 from model import unet_mobi
@@ -47,13 +44,13 @@ def fit_model(model_and_path):
 
   model = model_and_path["model"]
 
-  model.compile(loss='binary_crossentropy',
+  # model.compile(loss='binary_crossentropy',
+  model.compile(loss = focal_loss,
                 optimizer=tf.keras.optimizers.Adam(1e-4),
                 metrics=[ 
                     iou_score,
                     dice_coef
                 ])
-
 
   # fit 
   H = model.fit(train_dataset,
@@ -136,12 +133,6 @@ def load_model(name, is_train= True):
             print("load unet v1 ")
             return model
 
-        # elif name == "unet-v2":
-        #     model=unet_v2.unet()
-        #     model.load_weights(config.MODEL_PATH_UNET_V2)
-        #     print("load unet v2 ")
-        #     return model
-
         elif name == "unet-v3":
             model=unet_mobi.build_model()
             model.load_weights(config.MODEL_PATH_UNET_V3)
@@ -149,7 +140,7 @@ def load_model(name, is_train= True):
             return model
         
         elif name == "unet++":
-            model= unet_nested_v2.Nest_Net(deep_supervision=False)
+            model= unet_nested_v2.Nest_Net(256,256,3,3,deep_supervision=False)
             model.load_weights(config.MODEL_PATH_NESTED)
             return model
 
@@ -164,13 +155,6 @@ def load_model(name, is_train= True):
             model_and_path["path"] =config.MODEL_PATH_UNET_V1
             print("load unet v1 ")
             return model_and_path
-
-        # elif name == "unet-v2":
-        #     raise Exception("model loi ")
-        #     model_and_path["model"] = unet_v2.unet()
-        #     model_and_path["path"] =  config.MODEL_PATH_UNET_V2
-        #     print("load unet v2 ")
-        #     return model_and_path
 
         elif name == "unet-v3":
             model_and_path["model"] = unet_mobi.build_model()

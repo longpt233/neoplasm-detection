@@ -61,12 +61,13 @@ def mask2string(dir):
     }
     return r
 
+def make_submit(name):
+  MASK_DIR_PATH = config.PREDICT_PATH +"/"+name
+  dir = MASK_DIR_PATH
+  print(MASK_DIR_PATH)
+  res = mask2string(dir)
+  df = pd.DataFrame(columns=['Id', 'Expected'])
+  df['Id'] = res['ids']
+  df['Expected'] = res['strings']
 
-MASK_DIR_PATH = config.PREDICT_PATH
-dir = MASK_DIR_PATH
-res = mask2string(dir)
-df = pd.DataFrame(columns=['Id', 'Expected'])
-df['Id'] = res['ids']
-df['Expected'] = res['strings']
-
-df.to_csv(config.SUBMIT_PATH, index=False)
+  df.to_csv(config.SUBMIT_PATH+"/"+name+".csv", index=False)
