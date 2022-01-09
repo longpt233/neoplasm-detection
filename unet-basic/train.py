@@ -11,6 +11,8 @@ from model import unet
 from model import unet_mobi
 from model import unet_nested_v2
 
+from keras_unet_collection import _model_unet_plus_2d
+
 from data_prepare import *
 import config
 
@@ -45,7 +47,7 @@ def fit_model(model_and_path):
   model = model_and_path["model"]
 
   # model.compile(loss='binary_crossentropy',
-  model.compile(loss = focal_loss,
+  model.compile(loss = tversky_loss,
                 optimizer=tf.keras.optimizers.Adam(1e-4),
                 metrics=[ 
                     iou_score,
@@ -140,7 +142,11 @@ def load_model(name, is_train= True):
             return model
         
         elif name == "unet++":
-            model= unet_nested_v2.Nest_Net(256,256,3,3,deep_supervision=False)
+            # model= unet_nested_v2.get_unetpp()
+            model = _model_unet_plus_2d.unet_plus_2d((None, None, 3), [64, 128, 256, 512], n_labels=3,
+                            stack_num_down=2, stack_num_up=2,
+                            activation='LeakyReLU', output_activation='Softmax', 
+                            batch_norm=False, pool='max', unpool=False, deep_supervision=False,backbone='VGG16', weights='imagenet', name='unet3class')
             model.load_weights(config.MODEL_PATH_NESTED)
             return model
 
@@ -163,12 +169,18 @@ def load_model(name, is_train= True):
             return model_and_path
         
         elif name == "unet++":
-            model_and_path["model"] = unet_nested_v2.Nest_Net(256,256,3,3,deep_supervision=False)
+            print("load unet ++ ")
+            # model_and_path["model"] = unet_nested_v2.get_unetpp()
+            model_and_path["model"] = _model_unet_plus_2d.unet_plus_2d((None, None, 3), [64, 128, 256, 512], n_labels=3,
+                            stack_num_down=2, stack_num_up=2,
+                            activation='LeakyReLU', output_activation='Softmax', 
+                            batch_norm=False, pool='max', unpool=False, deep_supervision=False,backbone='VGG16', weights='imagenet', name='unet3class')
             model_and_path["path"] =  config.MODEL_PATH_NESTED
             return model_and_path
 
         else :
             raise Exception("name do not match any case")
+
 
 
         

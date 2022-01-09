@@ -3,7 +3,7 @@ WIDTH = 256
 HEIGHT = 256
 
 # hyper
-BATCH_SIZE = 8
+BATCH_SIZE = 8   # defaul 8
 EPOCH = 10
 
 # path 
