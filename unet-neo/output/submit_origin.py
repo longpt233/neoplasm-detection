@@ -70,6 +70,6 @@ def make_submit(predict_path):
     df['Id'] = res['ids']
     df['Expected'] = res['strings']
 
-    df.to_csv("/content/drive/MyDrive/20211/prj3/neoplasm-detection/output/submit/"+name_csv+".csv", index=False)
+    df.to_csv("/content/drive/MyDrive/20211/prj3/neoplasm-detection/unet-neo/output/submit/"+name_csv+".csv", index=False)
 
 

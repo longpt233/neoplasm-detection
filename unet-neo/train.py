@@ -10,21 +10,19 @@ import os
 
 # custom import 
 from model.neo_unet import NeoUNet
-from model.loss import *
-from model.unet import Unet
+from model.loss import * 
 
 
 class CFG: 
     train_image_size = 352
     prin_freq = 10
-    num_epochs = 4
+    num_epochs = 50
     batch_size = 16
     num_workers = 4   #  woker read ? 
     lr = 0.001  
     weight_decay = 1e-4
-    seed = 297
-    save =      '/content/drive/MyDrive/20211/prj3/neoplasm-detection/model/pth/neounet'
-    save_unet = "/content/drive/MyDrive/20211/prj3/neoplasm-detection/model/pth/unet"
+    seed = 298
+    save ='/content/drive/MyDrive/20211/prj3/neoplasm-detection/unet-neo/model/pth/neounet'
 
 
 def train(train_loader, model, custom_loss, optimizer, epoch, device):
@@ -62,7 +60,9 @@ def train_loop(train_dataset):
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model = NeoUNet()
+    
     model.to(device)
+    model.load_state_dict(torch.load("/content/drive/MyDrive/20211/prj3/neoplasm-detection/unet-neo/model/pth/neounet/neo_epoch048_loss0.25961.pth", map_location=torch.device('cuda')))
     model.train()   # chắc cú cho phép model train, còn model.predic nó sẽ k cập 
     np.random.seed(CFG.seed)
     
@@ -99,51 +99,6 @@ def train_loop(train_dataset):
             shutil.rmtree(save_root) # xoa model cu 
             os.makedirs(save_root, exist_ok=True)
             torch.save(model.state_dict(), os.path.join(save_root, 'neo_epoch{:03d}_loss{:.5f}.pth'.format(epoch, min_loss)))
-
-def train_loop_unet(train_dataset):
-
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    model = Unet(in_ch=3, out_ch=2)
-    model.to(device)
-    model.train()
-    np.random.seed(CFG.seed)
-    
-    train_loader = DataLoader(
-        dataset=train_dataset,
-        batch_size=CFG.batch_size,
-        sampler=torch.utils.data.RandomSampler(train_dataset),
-        num_workers=CFG.num_workers,
-        pin_memory=True
-    )
-    
-    save_root = CFG.save_unet
-    os.makedirs(save_root, exist_ok=True) 
-    min_loss = np.inf
-
-    optimizer = torch.optim.SGD(
-        model.parameters(),
-        lr=float(CFG.lr),
-        weight_decay=float(CFG.weight_decay),
-        momentum=0.9,
-        nesterov=True
-    )
-    
-    custom_loss = torch.nn.BCELoss()   # 2*256*256  -> flatten 
-    
-    for epoch in range(1, CFG.num_epochs):
-        print('Epoch {:03d}/{:03d}'.format(epoch, CFG.num_epochs))
-
-        train_loss  = train(train_loader, model, custom_loss, optimizer, epoch, device)
-
-        if train_loss < min_loss: 
-
-            min_loss = train_loss
-            shutil.rmtree(save_root) # xoa model cu 
-            os.makedirs(save_root, exist_ok=True)
-            torch.save(model.state_dict(), os.path.join(save_root, 'unet_epoch{:03d}_loss{:.5f}.pth'.format(epoch, min_loss)))
-
-
-
 
 
 

@@ -12,10 +12,9 @@ import matplotlib.pyplot as plt
 # custom import 
 from model.neo_unet import NeoUNet
 from model.loss import *
-from data_loader import TestDataset
-from model.unet import Unet
+from data_loader import TestDataset 
 
-save_path_root = '/content/drive/MyDrive/20211/prj3/neoplasm-detection/output/' 
+save_path_root = '/content/drive/MyDrive/20211/prj3/neoplasm-detection/unet-neo/output/' 
 test_path = glob('/content/drive/MyDrive/20211/prj3/data/test/test/*.jpeg')
 
 def run_test_neo(model_path):
@@ -61,52 +60,6 @@ def run_test_neo(model_path):
         output[(non_predict > neo_predict) * (non_predict > 0.5)] = [0, 255, 0]
         
         cv2.imwrite(os.path.join(save_path, f'{image_id[0]}.png'), output)
-
-
-
-def run_test_unet(model_path):
-
-    snapshot_path = model_path
-    model_name = str(snapshot_path).split("/")[-1]
-    save_folder = str(model_name).replace(".pth","")
-
-    save_path = save_path_root+ save_folder
-    os.makedirs(save_path, exist_ok=True)
-
-    device = torch.cuda if torch.cuda.is_available() else torch.device('cpu')
-    model = Unet(in_ch=3, out_ch=2)
-    model.load_state_dict(torch.load(snapshot_path, map_location=torch.device('cuda')))
-    test_dataset = TestDataset(test_path)
-    test_loader = DataLoader(
-        test_dataset,
-        batch_size=1,
-        num_workers=1,
-        pin_memory=False
-    )
-    for idx, item in tqdm(enumerate(test_loader)):
-        image, image_id, size = item['image'], item['id'], item['size']
-        h, w = size[0], size[1]
-        with torch.no_grad():
-            predict = model(image)
-
-        predict = predict[0]
-        predict = predict.permute(1, 2, 0).numpy()   # [2, 352, 352] => (352, 352, 2)  
-        f, ax = plt.subplots(nrows=1, ncols=3, figsize=(30, 30))
-        ax[0].set_title('ori')
-        ax[1].set_title('neo')
-        ax[2].set_title('non-neo')
-        ax[0].imshow(image[0].permute(1, 2, 0).numpy())
-        ax[1].imshow(predict[:,:,0])
-        ax[2].imshow(predict[:,:,1])
-
-        output = np.zeros(
-            (predict.shape[-2], predict.shape[-1], 3)).astype(np.uint8)
-        output[(neo_predict > non_predict) * (neo_predict > 0.5)] = [0, 0, 255]
-        output[(non_predict > neo_predict) * (non_predict > 0.5)] = [0, 255, 0]
-        
-        cv2.imwrite(os.path.join(save_path, f'{image_id[0]}.png'), output)
-
-
 
 
 
