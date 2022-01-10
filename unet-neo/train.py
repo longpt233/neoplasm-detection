@@ -16,10 +16,10 @@ from model.loss import *
 class CFG: 
     train_image_size = 352
     prin_freq = 10
-    num_epochs = 50
-    batch_size = 16
+    num_epochs = 150
+    batch_size = 8
     num_workers = 4   #  woker read ? 
-    lr = 0.001  
+    lr = 0.000006  
     weight_decay = 1e-4
     seed = 298
     save ='/content/drive/MyDrive/20211/prj3/neoplasm-detection/unet-neo/model/pth/neounet'
@@ -61,8 +61,9 @@ def train_loop(train_dataset):
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model = NeoUNet()
     
+    
+    model.load_state_dict(torch.load("/content/drive/MyDrive/20211/prj3/backup/neo_epoch185_loss0.05985.pth", map_location=torch.device('cuda')))
     model.to(device)
-    model.load_state_dict(torch.load("/content/drive/MyDrive/20211/prj3/neoplasm-detection/unet-neo/model/pth/neounet/neo_epoch048_loss0.25961.pth", map_location=torch.device('cuda')))
     model.train()   # chắc cú cho phép model train, còn model.predic nó sẽ k cập 
     np.random.seed(CFG.seed)
     
