@@ -2,7 +2,7 @@
 prj3
 
 # Dataset
--https://www.kaggle.com/c/bkai-igh-neopolyp/leaderboard
+- https://www.kaggle.com/c/bkai-igh-neopolyp/leaderboard
 
 # Contact 
 - longpt
